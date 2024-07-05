@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ウェブカメラ切り替えと設定</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        video {
+            width: 100%;
+            max-width: 600px;
+        }
+
+        select,
+        button {
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        #camera-info {
+            margin-top: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>ウェブカメラ切り替えと設定</h1>
+    <button id="init-button">カメラ一覧の更新（Safariだけだよ）</button>
+    <select id="camera-select"></select>
+    <select id="resolution-select">
+        <option value="default">デフォルト解像度</option>
+        <option value="320x240">320x240</option>
+        <option value="640x480">640x480</option>
+        <option value="1280x720">1280x720</option>
+        <option value="1920x1080">1920x1080</option>
+    </select>
+    <select id="frame-rate-select">
+        <option value="default">デフォルトフレームレート</option>
+        <option value="15">15 fps</option>
+        <option value="30">30 fps</option>
+        <option value="60">60 fps</option>
+    </select>
+    <button id="start-button">Start Camera</button>
+    <video id="video" autoplay playsinline></video>
+    <div id="camera-info"></div>
+
+    <script>
+        const videoElement = document.getElementById('video');
+        const cameraSelect = document.getElementById('camera-select');
+        const resolutionSelect = document.getElementById('resolution-select');
+        const frameRateSelect = document.getElementById('frame-rate-select');
+        const startButton = document.getElementById('start-button');
+        const initButton = document.getElementById('init-button');
+        const cameraInfo = document.getElementById('camera-info');
+        let initialStream;
+
+        initButton.addEventListener('click', async () => {
+            try {
+                // 仮のカメラアクセスをリクエストしてユーザーの許可を取得
+                initialStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                // デバイス一覧を取得
+                await listCameras();
+                // ストリームを停止してカメラをクローズ
+                if (initialStream) {
+                    initialStream.getTracks().forEach(track => track.stop());
+                }
+            } catch (err) {
+                console.error('Error accessing media devices.', err);
+            }
+        });
+
+        startButton.addEventListener('click', () => {
+            const selectedDeviceId = cameraSelect.value;
+            const selectedResolution = resolutionSelect.value;
+            const selectedFrameRate = frameRateSelect.value;
+            const [width, height] = selectedResolution === 'default' ? [null, null] : selectedResolution.split('x').map(Number);
+            const frameRate = selectedFrameRate === 'default' ? null : Number(selectedFrameRate);
+            startVideo(selectedDeviceId, width, height, frameRate);
+        });
+
+        async function listCameras() {
+            try {
+                // デバイスを列挙
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoInputs = devices.filter(device => device.kind === 'videoinput');
+
+                // セレクトボックスをクリア
+                cameraSelect.innerHTML = '';
+
+                // カメラデバイスをセレクトボックスに追加
+                videoInputs.forEach((device, index) => {
+                    const option = document.createElement('option');
+                    option.value = device.deviceId;
+                    option.text = device.label || `カメラ ${index + 1}`;
+                    cameraSelect.appendChild(option);
+                });
+            } catch (err) {
+                console.error('Error accessing media devices.', err);
+            }
+        }
+
+        async function startVideo(deviceId, width, height, frameRate) {
+            if (window.currentStream) {
+                // 現在のストリームを停止
+                window.currentStream.getTracks().forEach(track => track.stop());
+            }
+
+            try {
+                const constraints = {
+                    video: {
+                        deviceId: { exact: deviceId }
+                    }
+                };
+                if (width && height) {
+                    constraints.video.width = { exact: width };
+                    constraints.video.height = { exact: height };
+                }
+                if (frameRate) {
+                    constraints.video.frameRate = { exact: frameRate };
+                }
+
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                videoElement.srcObject = stream;
+                window.currentStream = stream;
+
+                // 解像度などの詳細情報を取得して表示
+                const videoTrack = stream.getVideoTracks()[0];
+                const settings = videoTrack.getSettings();
+                displayCameraInfo(settings);
+            } catch (err) {
+                console.error('Error accessing the camera.', err);
+            }
+        }
+
+        function displayCameraInfo(settings) {
+            const { deviceId, label, width, height, frameRate } = settings;
+            cameraInfo.innerHTML = `
+                <strong>カメラ情報:</strong><br>
+                デバイスID: ${deviceId}<br>
+                ラベル: ${label}<br>
+                解像度: ${width} x ${height}<br>
+                フレームレート: ${frameRate} fps
+            `;
+            cameraInfo.style.display = 'block';
+        }
+
+        // ページ読み込み時にカメラデバイスの一覧を取得
+        document.addEventListener('DOMContentLoaded', listCameras);
+    </script>
+</body>
+
+</html>
