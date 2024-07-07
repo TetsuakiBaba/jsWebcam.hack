@@ -1,6 +1,6 @@
 <script>
     const version_date = `
-    last modified: 2024/07/07 11:50:59
+    last modified: 2024/07/07 12:05:19
     `;
     // version_dateからlast modified, 改行と空白を削除
     const version_date_trim = version_date.replace(/last modified: |[\n ]/g, '');
@@ -28,37 +28,51 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header">
-                        Camera Serrings
+                        Camera Start Options
                     </div>
                     <div class="card-body">
-                        <div class="input-group mb-3">
-                            <button class="btn btn-outline-primary" id="init-button">Get device list</button>
-                            <select class="form-select" id="camera-select"></select>
-                        </div>
-                        <div class="input-group mb-3">
-                            <span class="input-group-text" id="inputGroup-sizing-sm">Resolution</span>
-                            <select class="form-select" id="resolution-select">
-                                <option value="default">default</option>
-                                <option value="320x240">320x240</option>
-                                <option value="640x480">640x480</option>
-                                <option value="1280x720">1280x720</option>
-                                <option value="1920x1080">1920x1080</option>
-                                <option value="2560x1440">2560x1440</option>
-                                <option value="3840x2160">3840x2160</option>
-                            </select>
-                            <span class="input-group-text" id="inputGroup-sizing-sm">FPS</span>
-                            <select class="form-select" id="frame-rate-select">
-                                <option value="default">default</option>
-                                <option value="15">15 fps</option>
-                                <option value="30">30 fps</option>
-                                <option value="60">60 fps</option>
-                                <option value="120">120 fps</option>
-                                <option value="240">240 fps</option>
-                            </select>
-                        </div>
 
-                        <div class="input-group mb-3">
-                            <button class="btn btn-outline-danger" id="start-button">Start Camera</button>
+                        <div class="card mb-3">
+                            <div class="card-body">
+                                <div class="input-group mb-3">
+                                    <button class="btn btn-outline-primary" id="init-button">Get device list</button>
+                                    <select class="form-select" id="camera-select"></select>
+                                </div>
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text" id="inputGroup-sizing-sm">Resolution</span>
+                                    <select class="form-select" id="resolution-select">
+                                        <option value="default">default</option>
+                                        <option value="320x240">320x240</option>
+                                        <option value="640x480">640x480</option>
+                                        <option value="1280x720">1280x720</option>
+                                        <option value="1920x1080">1920x1080</option>
+                                        <option value="2560x1440">2560x1440</option>
+                                        <option value="3840x2160">3840x2160</option>
+                                    </select>
+                                    <span class="input-group-text" id="inputGroup-sizing-sm">FPS</span>
+                                    <select class="form-select" id="frame-rate-select">
+                                        <option value="default">default</option>
+                                        <option value="15">15 fps</option>
+                                        <option value="30">30 fps</option>
+                                        <option value="60">60 fps</option>
+                                        <option value="120">120 fps</option>
+                                        <option value="240">240 fps</option>
+                                    </select>
+                                </div>
+                                <div class="input-group mb-3">
+                                    <span class="input-group-text" id="inputGroup-sizing-sm">Zoom</span>
+                                    <input class="form-control" type="number" id="zoom" value="1" step="0.1">
+                                    <span class="input-group-text" id="inputGroup-sizing-sm">facingMode</span>
+                                    <select class="form-select" id="facing-mode-select">
+                                        <option value="environment">environment</option>
+                                        <option value="user">user</option>
+                                    </select>
+                                </div>
+                                <div class="input-group">
+                                    <button class="btn btn-outline-danger" id="start-button">Start Camera</button>
+                                </div>
+
+                            </div>
                         </div>
 
                         <div class="input-group mb-3">
@@ -69,9 +83,10 @@
                         </div>
 
                         <div class="input-group mb-3">
-                            <button class="btn btn-outline-danger" id="start-button-with-longer-focus-distance">
-                                Start Camera with longer focusDistance
+                            <button class="btn btn-outline-danger" id="start-button-with-zoom">
+                                Start Camera with Zoom
                             </button>
+                            <input class="form-control" type="number" id="zoom" value="3" step="0.1">
                         </div>
 
                     </div>
@@ -104,7 +119,7 @@
         const frameRateSelect = document.getElementById('frame-rate-select');
         const startButton = document.getElementById('start-button');
         const startButtonWithDeviceId = document.getElementById('start-button-with-device_id');
-        const startButtonWithLongerFocusDistance = document.getElementById('start-button-with-longer-focus-distance');
+        const startButtonWithZoom = document.getElementById('start-button-with-zoom');
         const initButton = document.getElementById('init-button');
         const cameraInfo = document.getElementById('camera-info');
         let initialStream;
@@ -142,7 +157,7 @@
             startVideo(deviceId);
         });
 
-        startButtonWithLongerFocusDistance.addEventListener('click', () => {
+        startButtonWithZoom.addEventListener('click', () => {
             const deviceId = document.getElementById('device_id').value;
             const selectedResolution = resolutionSelect.value;
             const selectedFrameRate = frameRateSelect.value;
@@ -199,10 +214,8 @@
                 if (frameRate) {
                     constraints.video.frameRate = { exact: frameRate };
                 }
-                constraints.focusDistance = { ideal: 0.6 };
-                constraints.video.zoom = { ideal: 2 };
-                constraints.focusMode = 'manual';
-                constraints.video.facingMode = 'environment';
+                constraints.video.zoom = { ideal: document.querySelector('#zoom').value };
+                constraints.video.facingMode = document.querySelector('#facing-mode-select').value;
                 console.log(constraints);
 
                 const stream = await navigator.mediaDevices.getUserMedia(constraints);
