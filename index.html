@@ -1,6 +1,6 @@
 <script>
     const version_date = `
-    last modified: 2024/07/07 11:43:55
+    last modified: 2024/07/07 11:49:05
     `;
     // version_dateからlast modified, 改行と空白を削除
     const version_date_trim = version_date.replace(/last modified: |[\n ]/g, '');
@@ -200,6 +200,7 @@
                     constraints.video.frameRate = { exact: frameRate };
                 }
                 constraints.focusDistance = { ideal: 0.6 };
+                constraints.zoom = { ideal: 2.0 };
                 constraints.focusMode = 'manual';
                 constraints.video.facingMode = 'environment';
                 console.log(constraints);
@@ -223,7 +224,7 @@
 
         function displayCameraInfo(settings) {
             console.log(settings);
-            cameraInfo.innerHTML += `
+            cameraInfo.innerHTML = `
                 <br><strong>Video Settings:</strong><br>
                 ${JSON.stringify(settings, null, 2)}
             `;
