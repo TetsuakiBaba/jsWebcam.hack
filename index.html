@@ -33,6 +33,8 @@
                                 <option value="640x480">640x480</option>
                                 <option value="1280x720">1280x720</option>
                                 <option value="1920x1080">1920x1080</option>
+                                <option value="2560x1440">2560x1440</option>
+                                <option value="3840x2160">3840x2160</option>
                             </select>
                             <span class="input-group-text" id="inputGroup-sizing-sm">FPS</span>
                             <select class="form-select" id="frame-rate-select">
@@ -55,6 +57,13 @@
                             </button>
                             <input class="form-control" type="text" id="device_id" placeholder="Device ID">
                         </div>
+
+                        <div class="input-group mb-3">
+                            <button class="btn btn-outline-danger" id="start-button-with-longer-focus-distance">
+                                Start Camera with longer focusDistance
+                            </button>
+                        </div>
+
                     </div>
                 </div>
 
@@ -84,6 +93,7 @@
         const frameRateSelect = document.getElementById('frame-rate-select');
         const startButton = document.getElementById('start-button');
         const startButtonWithDeviceId = document.getElementById('start-button-with-device_id');
+        const startButtonWithLongerFocusDistance = document.getElementById('start-button-with-longer-focus-distance');
         const initButton = document.getElementById('init-button');
         const cameraInfo = document.getElementById('camera-info');
         let initialStream;
@@ -121,6 +131,15 @@
             startVideo(deviceId);
         });
 
+        startButtonWithLongerFocusDistance.addEventListener('click', () => {
+            const deviceId = document.getElementById('device_id').value;
+            const selectedResolution = resolutionSelect.value;
+            const selectedFrameRate = frameRateSelect.value;
+            const [width, height] = selectedResolution === 'default' ? [null, null] : selectedResolution.split('x').map(Number);
+            const frameRate = selectedFrameRate === 'default' ? null : Number(selectedFrameRate);
+            startVideo();
+        });
+
         async function listCameras() {
             try {
                 // デバイスを列挙
@@ -142,6 +161,11 @@
             }
         }
 
+        async function stopVideo() {
+            if (window.currentStream) {
+                window.currentStream.getTracks().forEach(track => track.stop());
+            }
+        }
         async function startVideo(deviceId, width, height, frameRate) {
             if (window.currentStream) {
                 // 現在のストリームを停止
@@ -149,11 +173,14 @@
             }
 
             try {
-                const constraints = {
-                    video: {
-                        deviceId: { exact: deviceId }
-                    }
+                let constraints = {
+
                 };
+                if (deviceId) {
+                    constraints.video = { deviceId: { exact: deviceId } };
+                } else {
+                    constraints.video = true;
+                }
                 if (width && height) {
                     constraints.video.width = { exact: width };
                     constraints.video.height = { exact: height };
@@ -161,6 +188,9 @@
                 if (frameRate) {
                     constraints.video.frameRate = { exact: frameRate };
                 }
+                constraints.focusDistance = { ideal: 0.6 };
+                constraints.focusMode = 'manual';
+                console.log(constraints);
 
                 const stream = await navigator.mediaDevices.getUserMedia(constraints);
                 videoElement.srcObject = stream;
@@ -174,6 +204,8 @@
                 displayCapabilities(capabilities);
             } catch (err) {
                 console.error('Error accessing the camera.', err);
+                stopVideo();
+                alert(err);
             }
         }
 
