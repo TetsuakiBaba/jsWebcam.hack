@@ -1,6 +1,6 @@
 <script>
     const version_date = `
-    last modified: 2024/07/07 11:49:05
+    last modified: 2024/07/07 11:50:59
     `;
     // version_dateからlast modified, 改行と空白を削除
     const version_date_trim = version_date.replace(/last modified: |[\n ]/g, '');
@@ -200,7 +200,7 @@
                     constraints.video.frameRate = { exact: frameRate };
                 }
                 constraints.focusDistance = { ideal: 0.6 };
-                constraints.zoom = { ideal: 2.0 };
+                constraints.video.zoom = { ideal: 2 };
                 constraints.focusMode = 'manual';
                 constraints.video.facingMode = 'environment';
                 console.log(constraints);
