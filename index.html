@@ -1,3 +1,12 @@
+<script>
+    const version_date = `
+    last modified: 2024/07/07 11:38:51
+    `;
+    // version_dateからlast modified, 改行と空白を削除
+    const version_date_trim = version_date.replace(/last modified: |[\n ]/g, '');
+
+
+</script>
 <!DOCTYPE html>
 <html lang="ja">
 
@@ -14,6 +23,7 @@
     <div class="container-sm">
 
         <h1 class="mt-5 display-1">Webcam.hack</h1>
+        <p class="text-muted small"><span id="version_date"></span></p>
         <div class="row mt-4">
             <div class="col-md-6">
                 <div class="card">
@@ -87,6 +97,7 @@
         crossorigin="anonymous"></script>
 
     <script>
+        document.getElementById('version_date').innerText = version_date_trim;
         const videoElement = document.getElementById('video');
         const cameraSelect = document.getElementById('camera-select');
         const resolutionSelect = document.getElementById('resolution-select');
@@ -153,7 +164,7 @@
                 videoInputs.forEach((device, index) => {
                     const option = document.createElement('option');
                     option.value = device.deviceId;
-                    option.text = device.label || `カメラ ${index + 1}`;
+                    option.text = device.label || `カメラ ${index + 1} `;
                     cameraSelect.appendChild(option);
                 });
             } catch (err) {
@@ -179,7 +190,7 @@
                 if (deviceId) {
                     constraints.video = { deviceId: { exact: deviceId } };
                 } else {
-                    constraints.video = true;
+                    constraints.video = {};
                 }
                 if (width && height) {
                     constraints.video.width = { exact: width };
@@ -190,6 +201,7 @@
                 }
                 constraints.focusDistance = { ideal: 0.6 };
                 constraints.focusMode = 'manual';
+                constraints.video.facingMode = 'environment';
                 console.log(constraints);
 
                 const stream = await navigator.mediaDevices.getUserMedia(constraints);
@@ -212,12 +224,12 @@
         function displayCameraInfo(settings) {
             const { deviceId, label, width, height, frameRate } = settings;
             cameraInfo.innerHTML = `
-                <strong>カメラ情報:</strong><br>
+            < strong > カメラ情報:</strong > <br>
                 デバイスID: ${deviceId}<br>
-                ラベル: ${label}<br>
-                解像度: ${width} x ${height}<br>
-                フレームレート: ${frameRate} fps
-            `;
+                    ラベル: ${label}<br>
+                        解像度: ${width} x ${height}<br>
+                            フレームレート: ${frameRate} fps
+                            `;
             cameraInfo.style.display = 'block';
         }
 
