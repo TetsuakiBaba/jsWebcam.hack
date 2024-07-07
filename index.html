@@ -1,6 +1,6 @@
 <script>
     const version_date = `
-    last modified: 2024/07/07 12:05:19
+    last modified: 2024/07/07 16:05:35
     `;
     // version_dateからlast modified, 改行と空白を削除
     const version_date_trim = version_date.replace(/last modified: |[\n ]/g, '');
@@ -32,73 +32,59 @@
                     </div>
                     <div class="card-body">
 
-                        <div class="card mb-3">
-                            <div class="card-body">
-                                <div class="input-group mb-3">
-                                    <button class="btn btn-outline-primary" id="init-button">Get device list</button>
-                                    <select class="form-select" id="camera-select"></select>
-                                </div>
-                                <div class="input-group mb-3">
-                                    <span class="input-group-text" id="inputGroup-sizing-sm">Resolution</span>
-                                    <select class="form-select" id="resolution-select">
-                                        <option value="default">default</option>
-                                        <option value="320x240">320x240</option>
-                                        <option value="640x480">640x480</option>
-                                        <option value="1280x720">1280x720</option>
-                                        <option value="1920x1080">1920x1080</option>
-                                        <option value="2560x1440">2560x1440</option>
-                                        <option value="3840x2160">3840x2160</option>
-                                    </select>
-                                    <span class="input-group-text" id="inputGroup-sizing-sm">FPS</span>
-                                    <select class="form-select" id="frame-rate-select">
-                                        <option value="default">default</option>
-                                        <option value="15">15 fps</option>
-                                        <option value="30">30 fps</option>
-                                        <option value="60">60 fps</option>
-                                        <option value="120">120 fps</option>
-                                        <option value="240">240 fps</option>
-                                    </select>
-                                </div>
-                                <div class="input-group mb-3">
-                                    <span class="input-group-text" id="inputGroup-sizing-sm">Zoom</span>
-                                    <input class="form-control" type="number" id="zoom" value="1" step="0.1">
-                                    <span class="input-group-text" id="inputGroup-sizing-sm">facingMode</span>
-                                    <select class="form-select" id="facing-mode-select">
-                                        <option value="environment">environment</option>
-                                        <option value="user">user</option>
-                                    </select>
-                                </div>
-                                <div class="input-group">
-                                    <button class="btn btn-outline-danger" id="start-button">Start Camera</button>
-                                </div>
-
-                            </div>
+                        <div class="input-group mb-3">
+                            <button class="btn btn-outline-primary" id="init-button">Get device list</button>
+                            <select class="form-select" id="camera-select"></select>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text" id="inputGroup-sizing-sm">Resolution</span>
+                            <select class="form-select" id="resolution-select">
+                                <option value="320x240">320x240</option>
+                                <option value="640x480" selected>640x480</option>
+                                <option value="1280x720">1280x720</option>
+                                <option value="1920x1080">1920x1080</option>
+                                <option value="2560x1440">2560x1440</option>
+                                <option value="3840x2160">3840x2160</option>
+                            </select>
+                            <span class="input-group-text" id="inputGroup-sizing-sm">FPS</span>
+                            <select class="form-select" id="frame-rate-select">
+                                <option value="15">15 fps</option>
+                                <option value="30" selected>30 fps</option>
+                                <option value="60">60 fps</option>
+                                <option value="120">120 fps</option>
+                                <option value="240">240 fps</option>
+                            </select>
+                        </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text" id="inputGroup-sizing-sm">Zoom</span>
+                            <input class="form-control" type="number" id="zoom" value="1" step="0.1">
+                            <span class="input-group-text" id="inputGroup-sizing-sm">facingMode</span>
+                            <select class="form-select" id="facing-mode-select">
+                                <option value="environment">environment</option>
+                                <option value="user">user</option>
+                            </select>
+                        </div>
+                        <div class="input-group mb-3">
+                            <button class="btn btn-outline-danger" id="start-button">Start Camera</button>
                         </div>
 
-                        <div class="input-group mb-3">
-                            <button class="btn btn-outline-danger" id="start-button-with-device_id">
-                                Start Camera with Device ID
-                            </button>
-                            <input class="form-control" type="text" id="device_id" placeholder="Device ID">
-                        </div>
-
-                        <div class="input-group mb-3">
-                            <button class="btn btn-outline-danger" id="start-button-with-zoom">
-                                Start Camera with Zoom
-                            </button>
-                            <input class="form-control" type="number" id="zoom" value="3" step="0.1">
+                        <div class="alert alert-light text-muted small">
+                            <strong>Constraints:</strong>
+                            <div id="constraints_info_detail"></div>
                         </div>
 
                     </div>
+
                 </div>
 
             </div>
-            <div class="col-md-6">
+            <div class=" col-md-6">
                 <div class="card">
                     <div class="card-header">
                         Camera Preview and Info
                     </div>
                     <div class="card-body">
+                        <span id="zoom_ui"></span>
                         <video class="img-fluid" id="video" autoplay playsinline></video>
                         <div class="small alert alert-light" id="camera-info"></div>
                     </div>
@@ -118,8 +104,6 @@
         const resolutionSelect = document.getElementById('resolution-select');
         const frameRateSelect = document.getElementById('frame-rate-select');
         const startButton = document.getElementById('start-button');
-        const startButtonWithDeviceId = document.getElementById('start-button-with-device_id');
-        const startButtonWithZoom = document.getElementById('start-button-with-zoom');
         const initButton = document.getElementById('init-button');
         const cameraInfo = document.getElementById('camera-info');
         let initialStream;
@@ -140,31 +124,10 @@
         });
 
         startButton.addEventListener('click', () => {
-            const selectedDeviceId = cameraSelect.value;
-            const selectedResolution = resolutionSelect.value;
-            const selectedFrameRate = frameRateSelect.value;
-            const [width, height] = selectedResolution === 'default' ? [null, null] : selectedResolution.split('x').map(Number);
-            const frameRate = selectedFrameRate === 'default' ? null : Number(selectedFrameRate);
-            startVideo(selectedDeviceId, width, height, frameRate);
-        });
-
-        startButtonWithDeviceId.addEventListener('click', () => {
-            const deviceId = document.getElementById('device_id').value;
-            const selectedResolution = resolutionSelect.value;
-            const selectedFrameRate = frameRateSelect.value;
-            const [width, height] = selectedResolution === 'default' ? [null, null] : selectedResolution.split('x').map(Number);
-            const frameRate = selectedFrameRate === 'default' ? null : Number(selectedFrameRate);
-            startVideo(deviceId);
-        });
-
-        startButtonWithZoom.addEventListener('click', () => {
-            const deviceId = document.getElementById('device_id').value;
-            const selectedResolution = resolutionSelect.value;
-            const selectedFrameRate = frameRateSelect.value;
-            const [width, height] = selectedResolution === 'default' ? [null, null] : selectedResolution.split('x').map(Number);
-            const frameRate = selectedFrameRate === 'default' ? null : Number(selectedFrameRate);
             startVideo();
         });
+
+
 
         async function listCameras() {
             try {
@@ -176,6 +139,10 @@
                 cameraSelect.innerHTML = '';
 
                 // カメラデバイスをセレクトボックスに追加
+                const option = document.createElement('option');
+                option.value = "default";
+                option.text = `Choose Camera`;
+                cameraSelect.appendChild(option);
                 videoInputs.forEach((device, index) => {
                     const option = document.createElement('option');
                     option.value = device.deviceId;
@@ -192,7 +159,20 @@
                 window.currentStream.getTracks().forEach(track => track.stop());
             }
         }
-        async function startVideo(deviceId, width, height, frameRate) {
+        async function startVideo() {
+
+            const device_id = document.querySelector('#camera-select').value;
+
+            const resulution = document.querySelector('#resolution-select').value;
+            //  resolution には文字列で "widthxheight" が入っているので、 width と height に分割
+            width = resulution.split('x')[0];
+            height = resulution.split('x')[1];
+
+            const frameRate = document.querySelector('#frame-rate-select').value;
+
+            if (device_id === 'default') {
+                deviceId = null;
+            }
             if (window.currentStream) {
                 // 現在のストリームを停止
                 window.currentStream.getTracks().forEach(track => track.stop());
@@ -202,10 +182,11 @@
                 let constraints = {
 
                 };
-                if (deviceId) {
-                    constraints.video = { deviceId: { exact: deviceId } };
-                } else {
+                if (device_id == 'default') {
                     constraints.video = {};
+
+                } else {
+                    constraints.video = { deviceId: { exact: device_id } };
                 }
                 if (width && height) {
                     constraints.video.width = { exact: width };
@@ -216,7 +197,10 @@
                 }
                 constraints.video.zoom = { ideal: document.querySelector('#zoom').value };
                 constraints.video.facingMode = document.querySelector('#facing-mode-select').value;
-                console.log(constraints);
+
+                // constraints情報を constrains_info_detail に表示
+                document.getElementById('constraints_info_detail').innerText = JSON.stringify(constraints, null, 2);
+
 
                 const stream = await navigator.mediaDevices.getUserMedia(constraints);
                 videoElement.srcObject = stream;
@@ -228,6 +212,17 @@
                 displayCameraInfo(settings);
                 const capabilities = videoTrack.getCapabilities();
                 displayCapabilities(capabilities);
+
+                // ズームUIを表示
+                if (capabilities.zoom) {
+                    document.getElementById('zoom_ui').innerHTML = `
+                        <input type="range" min="${capabilities.zoom.min}" max="${capabilities.zoom.max}" value="${settings.zoom}" step="${capabilities.zoom.step}" id="zoom_ui_input">
+                    `;
+                    document.getElementById('zoom_ui_input').addEventListener('input', (event) => {
+                        videoTrack.applyConstraints({ advanced: [{ zoom: parseFloat(event.target.value) }] });
+                    });
+                }
+
             } catch (err) {
                 console.error('Error accessing the camera.', err);
                 stopVideo();
@@ -236,7 +231,6 @@
         }
 
         function displayCameraInfo(settings) {
-            console.log(settings);
             cameraInfo.innerHTML = `
                 <br><strong>Video Settings:</strong><br>
                 ${JSON.stringify(settings, null, 2)}
