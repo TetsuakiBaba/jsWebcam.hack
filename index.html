@@ -1,6 +1,6 @@
 <script>
     const version_date = `
-    last modified: 2024/07/07 11:38:51
+    last modified: 2024/07/07 11:43:55
     `;
     // version_dateからlast modified, 改行と空白を削除
     const version_date_trim = version_date.replace(/last modified: |[\n ]/g, '');
@@ -222,14 +222,11 @@
         }
 
         function displayCameraInfo(settings) {
-            const { deviceId, label, width, height, frameRate } = settings;
-            cameraInfo.innerHTML = `
-            < strong > カメラ情報:</strong > <br>
-                デバイスID: ${deviceId}<br>
-                    ラベル: ${label}<br>
-                        解像度: ${width} x ${height}<br>
-                            フレームレート: ${frameRate} fps
-                            `;
+            console.log(settings);
+            cameraInfo.innerHTML += `
+                <br><strong>Video Settings:</strong><br>
+                ${JSON.stringify(settings, null, 2)}
+            `;
             cameraInfo.style.display = 'block';
         }
 
