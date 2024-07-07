@@ -1,6 +1,6 @@
 <script>
     const version_date = `
-    last modified: 2024/07/07 16:15:37
+    last modified: 2024/07/07 16:21:44
     `;
     // version_dateからlast modified, 改行と空白を削除
     const version_date_trim = version_date.replace(/last modified: |[\n ]/g, '');
@@ -215,6 +215,9 @@
 
                 // ズームUIを表示
                 if (capabilities.zoom) {
+                    if (!capabilities.zoom.step) {
+                        capabilities.zoom.step = 0.1;
+                    }
                     document.getElementById('zoom_ui').innerHTML = `Zoom:
                         <input type="range" class="form-range" min="${capabilities.zoom.min}" max="${capabilities.zoom.max}" value="${settings.zoom}" step="${capabilities.zoom.step}" id="zoom_ui_input">
                     `;
