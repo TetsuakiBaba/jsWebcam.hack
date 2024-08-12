@@ -1,6 +1,6 @@
 <script>
     const version_date = `
-    last modified: 2024/07/07 18:13:45
+    last modified: 2024/08/12 12:37:51
     `;
     // version_dateからlast modified, 改行と空白を削除
     const version_date_trim = version_date.replace(/last modified: |[\n ]/g, '');
@@ -85,7 +85,7 @@
                         Camera Preview and Info
                     </div>
                     <div class="card-body">
-                        <video class="img-fluid" id="video" autoplay playsinline></video>
+                        <video class="img-fluid" id="video" controls autoplay playsinline></video>
                         <span id="zoom_ui"></span>
                         <div class="small alert alert-light" id="camera-info"></div>
                     </div>
